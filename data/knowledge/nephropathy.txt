@@ -1,0 +1,15 @@
+Overview of Nephropathy and Renal Pathophysiology:
+
+Nephropathy refers to damage, disease, or impairment of the kidneys. Broadly categorized into diabetic and non-diabetic causes, chronic kidney disease (CKD) progresses across several functional stages defined by eGFR and albuminuria levels.
+
+Diabetic Kidney Disease (DKD):
+Diabetic nephropathy is a major microvascular complication of persistent hyperglycemia. Hyperglycemia induces intraglomerular hypertension, mesangial expansion, and podocyte injury, leading initially to hyperfiltration, followed by microalbuminuria and progressive decline in eGFR.
+
+Hypertensive Nephrosclerosis:
+Chronic systemic hypertension transmits high pressure to the renal microcirculation, causing arteriolosclerosis, glomerulosclerosis, and focal tubular atrophy. Controlling blood pressure mitigates progressive vascular nephrosclerosis.
+
+Longitudinal Slope and Delta Analytics in Research:
+In clinical research, analyzing longitudinal eGFR change over time (eGFR slope) and delta changes between clinical measurements provides insights into trajectory stability. A rapid eGFR decline (e.g., > 4-5 mL/min/1.73m^2 per year) represents an accelerated trajectory pattern compared to typical age-related changes (~1 mL/min/1.73m^2 per year).
+
+Stochastic Simulation and Trajectory Analytics:
+Stochastic transition models simulate theoretical population-level transition probabilities between analytical states (stable, early abnormality, moderate impairment, advanced impairment). These Markov process simulations enable researchers to explore statistical uncertainty and scenario bands without predicting individual clinical outcomes.

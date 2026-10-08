@@ -1,0 +1,20 @@
+Kidney Physiology and Function Overview:
+
+The kidneys are vital organs responsible for filtering metabolic waste products, excess fluid, and toxins from the bloodstream to form urine. Beyond filtration, the kidneys regulate electrolyte concentrations, acid-base homeostasis, blood pressure (via the renin-angiotensin-aldosterone system), and red blood cell production (via erythropoietin secretion).
+
+Key Biomarkers of Kidney Health:
+
+1. Estimated Glomerular Filtration Rate (eGFR):
+eGFR is a key metric reflecting how well the glomeruli filter blood. It is expressed in mL/min/1.73m^2. Normal eGFR is typically 90 or above. An eGFR below 60 mL/min/1.73m^2 sustained over 3 months signifies reduced kidney function. Longitudinal tracking of eGFR slope over time helps identify rate of functional change.
+
+2. Serum Creatinine:
+Serum creatinine is a breakdown product of creatine phosphate from muscle tissue. Healthy kidneys clear creatinine from the blood. Elevated serum creatinine levels often indicate reduced glomerular filtration capability.
+
+3. Urine Albumin-to-Creatinine Ratio (UACR):
+UACR measures the ratio of albumin (a blood protein) to creatinine in urine, expressed in mg/g. Albuminuria serves as an early marker of glomerular damage:
+- Normal/Mildly increased: UACR < 30 mg/g
+- Moderately increased (Microalbuminuria): UACR 30 to 300 mg/g
+- Severely increased (Macroalbuminuria): UACR > 300 mg/g
+
+4. Blood Pressure and Glycemia:
+Hypertension (elevated systolic/diastolic blood pressure) and hyperglycemia (elevated HbA1c and fasting blood glucose) are major risk factors that strain renal microvasculature. Maintaining optimal blood pressure and glycemic stability is essential for kidney preservation.
