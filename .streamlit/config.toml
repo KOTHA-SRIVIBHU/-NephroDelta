@@ -1,0 +1,4 @@
+[server]
+# Streamlit's watcher can inspect lazy Transformers modules and import optional
+# vision dependencies such as torchvision. The app does not need hot reload.
+fileWatcherType = "none"

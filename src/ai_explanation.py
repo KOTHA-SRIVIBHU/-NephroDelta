@@ -1,13 +1,13 @@
 """
-Gemini AI Explanation Module for NephroDelta.
+Groq AI Explanation Module for NephroDelta.
 
 Generates natural-language educational explanations of pre-computed analytical results
-and retrieved RAG context using Google Gemini API.
+and retrieved RAG context using Groq's fast LLM inference API (default: openai/gpt-oss-120b).
 
 SAFETY & COMPLIANCE:
 - Pre-computed metrics only; LLM does not perform calculations.
 - Strict system prompt enforcing non-diagnostic, educational role.
-- Graceful handling when GEMINI_API_KEY is not configured or API fails.
+- Graceful handling when GROQ_API_KEY is not configured or API fails.
 """
 
 import os
@@ -16,6 +16,9 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env if present
 load_dotenv()
+
+# llama-3.3-70b-versatile is no longer served by Groq; override with GROQ_MODEL if needed.
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
 SYSTEM_SAFETY_INSTRUCTION = (
     "You are an educational healthcare analytics assistant.\n"
@@ -30,9 +33,9 @@ SYSTEM_SAFETY_INSTRUCTION = (
 )
 
 
-def get_gemini_api_key() -> Optional[str]:
-    """Retrieves the GEMINI_API_KEY from environment variables."""
-    key = os.getenv("GEMINI_API_KEY")
+def get_groq_api_key() -> Optional[str]:
+    """Retrieves the GROQ_API_KEY from environment variables."""
+    key = os.getenv("GROQ_API_KEY")
     if key and key.strip():
         return key.strip()
     return None
@@ -48,8 +51,8 @@ def generate_explanation(
     rag_context: List[str]
 ) -> str:
     """
-    Formulates prompt from pre-computed metrics and retrieved RAG context,
-    then queries Google Gemini for natural-language explanation.
+    Formulates a structured prompt from pre-computed analytics + RAG context,
+    then queries Groq LLM for a natural-language educational explanation.
 
     Args:
         patient_id: Identifier of the patient.
@@ -61,16 +64,21 @@ def generate_explanation(
         rag_context: Retrieved text chunks from RAG vector search.
 
     Returns:
-        String containing Gemini AI explanation or standard status fallback.
+        String containing the AI explanation or a fallback status message.
     """
-    api_key = get_gemini_api_key()
+    api_key = get_groq_api_key()
     if not api_key:
-        return "Gemini API key not configured. Analytical features remain available."
+        return "Groq API key not configured. Analytical features remain available."
 
-    # Format structured context into prompt
+    # Format retrieved educational context
     context_str = "\n".join([f"- {c}" for c in rag_context]) if rag_context else "No extra context retrieved."
 
-    prompt = f"""
+    # Final median / percentile values
+    median_final = simulation_results.get("median", [None])[-1]
+    p10_final    = simulation_results.get("p10",    [None])[-1]
+    p90_final    = simulation_results.get("p90",    [None])[-1]
+
+    user_prompt = f"""
 Please provide an educational explanation of the following pre-computed longitudinal analytics:
 
 PATIENT IDENTIFIER: {patient_id}
@@ -92,51 +100,46 @@ SIMULATION ANALYTICAL STATE (NOT A DIAGNOSIS):
 - Current State: {analytical_state_name}
 
 STOCHASTIC MONTE CARLO SIMULATION RESULTS ({simulation_results.get('num_simulations')} runs, {simulation_results.get('time_horizon')} steps):
-- Final Step Median eGFR: {simulation_results.get('median', [])[-1] if simulation_results.get('median') else 'N/A'} mL/min/1.73m²
-- Final Step 10th Percentile: {simulation_results.get('p10', [])[-1] if simulation_results.get('p10') else 'N/A'} mL/min/1.73m²
-- Final Step 90th Percentile: {simulation_results.get('p90', [])[-1] if simulation_results.get('p90') else 'N/A'} mL/min/1.73m²
+- Final Step Median eGFR:        {median_final} mL/min/1.73m²
+- Final Step 10th Percentile:    {p10_final} mL/min/1.73m²
+- Final Step 90th Percentile:    {p90_final} mL/min/1.73m²
 
 RETRIEVED EDUCATIONAL KNOWLEDGE CONTEXT:
 {context_str}
 
 EXPLANATION STRUCTURE REQUIRED:
-1. Observed Trends Summary (Explain observed eGFR/UACR changes and slopes)
-2. Delta & Metric Interpretation (Explain what eGFR, UACR, and creatinine deltas generally indicate)
-3. Stochastic Simulation Interpretation (Explain simulation median and percentile uncertainty bands)
-4. General Educational Context (Synthesize the retrieved educational concepts)
-5. Analytical Limitations & Safety Disclaimer (Emphasize educational/research scope and absence of clinical prediction)
+1. Observed Trends Summary
+2. Delta & Metric Interpretation
+3. Stochastic Simulation Interpretation
+4. General Educational Context
+5. Analytical Limitations & Safety Disclaimer
 """
 
-    # Attempt calling Gemini using available SDKs
     try:
-        # Try new google-genai SDK first
-        from google import genai
-        from google.genai import types
+        from groq import Groq
 
-        client = genai.Client(api_key=api_key)
-        response = client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_SAFETY_INSTRUCTION,
-                temperature=0.2
-            )
+        client = Groq(api_key=api_key)
+        # gpt-oss models spend part of the token budget on reasoning; keep it short.
+        extra = {"reasoning_effort": "low"} if GROQ_MODEL.startswith("openai/gpt-oss") else {}
+        response = client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": SYSTEM_SAFETY_INSTRUCTION},
+                {"role": "user",   "content": user_prompt}
+            ],
+            temperature=0.2,
+            max_completion_tokens=3000,
+            **extra,
         )
-        if response and response.text:
-            return response.text.strip()
-    except Exception as e1:
-        # Fallback to google-generativeai legacy SDK if installed
-        try:
-            import google.generativeai as genai_legacy
-            genai_legacy.configure(api_key=api_key)
-            model = genai_legacy.GenerativeModel(
-                model_name="gemini-1.5-flash",
-                system_instruction=SYSTEM_SAFETY_INSTRUCTION
-            )
-            response = model.generate_content(prompt)
-            if response and response.text:
-                return response.text.strip()
-        except Exception as e2:
-            print(f"Warning: Gemini API call failed: {e1} / {e2}")
+        result = response.choices[0].message.content
+        if result and result.strip():
+            return result.strip()
+
+    except Exception as e:
+        print(f"Warning: Groq API call failed: {e}")
+        return (
+            "AI explanation unavailable because the Groq API call failed: "
+            f"{type(e).__name__}: {e}. Analytical results are still available."
+        )
 
     return "AI explanation unavailable. Analytical results are still available."

@@ -23,7 +23,7 @@ from src.delta_analysis import (
 )
 from src.simulation import run_monte_carlo_simulation
 from src.rag import retrieve_context
-from src.ai_explanation import generate_explanation, get_gemini_api_key
+from src.ai_explanation import generate_explanation, get_groq_api_key
 
 st.set_page_config(
     page_title="NephroDelta Analytics",
@@ -261,9 +261,9 @@ def main():
     # SECTION 6: Generative AI Explanation
     st.subheader("Generative AI Explanation")
 
-    api_key_status = get_gemini_api_key()
+    api_key_status = get_groq_api_key()
     if not api_key_status:
-        st.info("Gemini API key not configured. Analytical features remain available.")
+        st.info("Groq API key not configured. Analytical features remain available.")
 
     if st.button("Generate Explanation", type="primary"):
         with st.spinner("Retrieving educational context and generating AI explanation..."):

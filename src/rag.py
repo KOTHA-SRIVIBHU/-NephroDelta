@@ -28,6 +28,8 @@ def chunk_text(text: str, chunk_size: int = 400, overlap: int = 50) -> List[str]
     """
     paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
     chunks = []
+    # An overlap >= chunk_size would give a non-positive step and loop forever.
+    step = chunk_size - overlap if 0 <= overlap < chunk_size else chunk_size
 
     for para in paragraphs:
         if len(para) <= chunk_size:
@@ -38,7 +40,7 @@ def chunk_text(text: str, chunk_size: int = 400, overlap: int = 50) -> List[str]
                 end = start + chunk_size
                 chunk = para[start:end]
                 chunks.append(chunk.strip())
-                start += (chunk_size - overlap)
+                start += step
 
     return chunks
 

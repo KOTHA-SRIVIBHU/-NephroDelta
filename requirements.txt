@@ -6,6 +6,6 @@ streamlit
 plotly
 faiss-cpu
 sentence-transformers
-google-genai
+groq
 python-dotenv
 pytest
